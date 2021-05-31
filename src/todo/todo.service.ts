@@ -15,11 +15,18 @@ export class TodoService {
   }
 
   findOneById(id: number): Promise<Todo> {
-    return this.todoRepository.findOneOrFail({ id });
+    return this.todoRepository
+      .createQueryBuilder('todo')
+      .leftJoinAndSelect('todo.user', 'user')
+      .where('todo.id = :todoId', { todoId: id })
+      .getOne();
   }
 
   findAll(): Promise<Todo[]> {
-    return this.todoRepository.find();
+    return this.todoRepository
+      .createQueryBuilder('todo')
+      .leftJoinAndSelect('todo.user', 'user')
+      .getMany();
   }
 
   update(id: number, { name, completed }: TodoInput): Promise<Todo> {
