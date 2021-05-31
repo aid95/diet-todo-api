@@ -10,10 +10,10 @@ export class Todo extends CommonEntity {
   name: string;
 
   @Field(() => Boolean, { nullable: true })
-  @Column()
+  @Column({ nullable: true, default: false })
   completed?: boolean;
 
   @Field(() => Date, { nullable: true })
-  @Column()
+  @Column({ nullable: true })
   completedAt?: Date;
 }

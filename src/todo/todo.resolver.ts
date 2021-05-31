@@ -8,17 +8,19 @@ export class TodoResolver {
   constructor(private readonly todoService: TodoService) {}
 
   @Query(() => Todo, { nullable: true })
-  todo(@Args('todoId', { nullable: true }) todoId: number) {
+  todo(@Args('todoId', { nullable: true }) todoId: number): Promise<Todo> {
     return this.todoService.findOneById(todoId);
   }
 
   @Query(() => [Todo])
-  todos() {
+  todos(): Promise<Todo[]> {
     return this.todoService.findAll();
   }
 
   @Mutation(() => Todo, { nullable: true })
-  CreateTodo(@Args('todoInput', { nullable: true }) todoInput: TodoInput) {
+  CreateTodo(
+    @Args('todoInput', { nullable: true }) todoInput: TodoInput,
+  ): Promise<Todo> {
     return this.todoService.create(todoInput);
   }
 
@@ -26,12 +28,14 @@ export class TodoResolver {
   UpdateTodo(
     @Args('todoId', { nullable: true }) todoId: number,
     @Args('todoInput', { nullable: true }) todoInput: TodoInput,
-  ) {
+  ): Promise<Todo> {
     return this.todoService.update(todoId, todoInput);
   }
 
   @Mutation(() => Todo, { nullable: true })
-  DeleteTodo(@Args('todoId', { nullable: true }) todoId: number) {
+  DeleteTodo(
+    @Args('todoId', { nullable: true }) todoId: number,
+  ): Promise<Todo> {
     return this.todoService.remove(todoId);
   }
 }

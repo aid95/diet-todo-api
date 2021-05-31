@@ -12,10 +12,10 @@ export class CommonEntity {
   id: number;
 
   @Field(() => Date, { nullable: true })
-  @CreateDateColumn()
+  @CreateDateColumn({ nullable: true })
   createdAt?: Date;
 
   @Field(() => Date, { nullable: true })
-  @UpdateDateColumn()
+  @UpdateDateColumn({ nullable: true })
   updatedAt?: Date;
 }
