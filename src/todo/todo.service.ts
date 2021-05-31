@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { isExistsQuery } from 'src/common/utils/query';
 import { Repository } from 'typeorm';
 import { TodoInput } from './dtos/todo-input.dto';
 import { Todo } from './entities/todo.entity';
@@ -29,11 +30,21 @@ export class TodoService {
       .getMany();
   }
 
-  update(id: number, { name, completed }: TodoInput): Promise<Todo> {
+  async update(id: number, { name, completed }: TodoInput): Promise<Todo> {
+    const exists = await this.isExists(id);
+    if (!exists) {
+      throw new NotFoundException();
+    }
+
     return this.todoRepository.save({ id, name, completed });
   }
 
   async remove(id: number): Promise<Todo> {
+    const exists = await this.isExists(id);
+    if (!exists) {
+      throw new NotFoundException();
+    }
+
     const {
       raw: [deletedTodo],
     } = await this.todoRepository
@@ -43,5 +54,15 @@ export class TodoService {
       .returning('*')
       .execute();
     return deletedTodo as Todo;
+  }
+
+  async isExists(id: number): Promise<boolean> {
+    const query = this.todoRepository
+      .createQueryBuilder('todo')
+      .select('1')
+      .where(`todo.id = ${id}`)
+      .getQuery();
+    const [{ exists }] = await this.todoRepository.query(isExistsQuery(query));
+    return exists;
   }
 }
