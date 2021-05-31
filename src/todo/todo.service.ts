@@ -11,7 +11,12 @@ export class TodoService {
     @InjectRepository(Todo) private readonly todoRepository: Repository<Todo>,
   ) {}
   create({ name, completed }: TodoInput): Promise<Todo> {
-    const newTodo = this.todoRepository.create({ name, completed });
+    const completedAt = completed ? new Date() : null;
+    const newTodo = this.todoRepository.create({
+      name,
+      completed,
+      completedAt,
+    });
     return this.todoRepository.save(newTodo);
   }
 
@@ -36,7 +41,8 @@ export class TodoService {
       throw new NotFoundException();
     }
 
-    return this.todoRepository.save({ id, name, completed });
+    const completedAt = completed ? new Date() : null;
+    return this.todoRepository.save({ id, name, completed, completedAt });
   }
 
   async remove(id: number): Promise<Todo> {
@@ -56,13 +62,13 @@ export class TodoService {
     return deletedTodo as Todo;
   }
 
-  async isExists(id: number): Promise<boolean> {
+  private async isExists(id: number): Promise<boolean> {
     const query = this.todoRepository
       .createQueryBuilder('todo')
       .select('1')
       .where(`todo.id = ${id}`)
       .getQuery();
     const [{ exists }] = await this.todoRepository.query(isExistsQuery(query));
-    return exists;
+    return exists as boolean;
   }
 }
