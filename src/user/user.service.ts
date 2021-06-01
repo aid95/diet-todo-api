@@ -11,6 +11,8 @@ import { isExistsQuery } from '../common/utils/query';
 import { UserInput } from './dtos/user-input.dto';
 import { JwtService } from '../jwt/jwt.service';
 import * as argon2 from 'argon2';
+import * as uuid from 'uuid4';
+import { LoginOutput } from './dtos/login-output.dto';
 
 @Injectable()
 export class UserService {
@@ -23,13 +25,22 @@ export class UserService {
     return this.userRepository.findOneOrFail(id);
   }
 
-  async login(username: string, password: string): Promise<string> {
+  async login(username: string, password: string): Promise<LoginOutput> {
     const user = await this.userRepository.findOneOrFail({ username });
     const isValid = await argon2.verify(user.password, password);
     if (!isValid) {
       throw new UnauthorizedException();
     }
-    return this.jwtService.sign({ id: user.id });
+
+    const accessToken = this.jwtService.getAccessToken({ id: user.id });
+    const refreshToken = this.jwtService.getRefreshToken({
+      id: user.id,
+      uuid: uuid(),
+    });
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 
   async create(userInput: UserInput): Promise<User> {

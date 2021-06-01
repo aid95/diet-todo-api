@@ -19,7 +19,9 @@ import { AuthModule } from './auth/auth.module';
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
         ACCESS_TOKEN_PRIVATE_KEY: Joi.string().required(),
+        ACCESS_TOKEN_EXPIRATION_TIME: Joi.string().required(),
         REFRESH_TOKEN_PRIVATE_KEY: Joi.string().required(),
+        REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -41,9 +43,10 @@ import { AuthModule } from './auth/auth.module';
         numberScalarMode: 'integer',
       },
       context: ({ req }) => {
-        const { authorization } = req.headers;
+        const { authorization, refresh } = req.headers;
         return {
           authorization,
+          refresh,
         };
       },
       autoSchemaFile: true,

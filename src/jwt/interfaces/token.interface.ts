@@ -1,3 +1,8 @@
-export interface Token {
+export interface AccessToken {
   id: number;
+}
+
+export interface RefreshToken {
+  id: number;
+  uuid: string;
 }

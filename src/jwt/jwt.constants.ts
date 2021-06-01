@@ -1,1 +1,15 @@
 export const JWT_CONFIG_OPTIONS = 'JWT_CONFIG_OPTIONS';
+
+export const JWT_MALFORMED = 'jwt malformed';
+
+export const INVALID_TOKEN = 'invalid token';
+
+export const JWT_EXPIRED = 'jwt expired';
+
+export const ACCESS_TOKEN_PRIVATE_KEY = 'ACCESS_TOKEN_PRIVATE_KEY';
+
+export const REFRESH_TOKEN_PRIVATE_KEY = 'REFRESH_TOKEN_PRIVATE_KEY';
+
+export const ACCESS_TOKEN_EXPIRATION_TIME = 'ACCESS_TOKEN_EXPIRATION_TIME';
+
+export const REFRESH_TOKEN_EXPIRATION_TIME = 'REFRESH_TOKEN_EXPIRATION_TIME';
