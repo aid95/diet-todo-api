@@ -19,6 +19,10 @@ export class UserService {
     private readonly jwtService: JwtService,
   ) {}
 
+  findOne(id: number) {
+    return this.userRepository.findOneOrFail(id);
+  }
+
   async login(username: string, password: string): Promise<string> {
     const user = await this.userRepository.findOneOrFail({ username });
     const isValid = await argon2.verify(user.password, password);

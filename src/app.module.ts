@@ -6,6 +6,7 @@ import * as Joi from 'joi';
 import { TodoModule } from './todo/todo.module';
 import { UserModule } from './user/user.module';
 import { JwtModule } from './jwt/jwt.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -39,6 +40,12 @@ import { JwtModule } from './jwt/jwt.module';
       buildSchemaOptions: {
         numberScalarMode: 'integer',
       },
+      context: ({ req }) => {
+        const { authorization } = req.headers;
+        return {
+          authorization,
+        };
+      },
       autoSchemaFile: true,
       playground: true,
     }),
@@ -46,9 +53,9 @@ import { JwtModule } from './jwt/jwt.module';
       accessTokenPrivateKey: process.env.ACCESS_TOKEN_PRIVATE_KEY,
       refreshTokenPrivateKey: process.env.REFRESH_TOKEN_PRIVATE_KEY,
     }),
-    TodoModule,
+    AuthModule,
     UserModule,
-    JwtModule,
+    TodoModule,
   ],
 })
 export class AppModule {}

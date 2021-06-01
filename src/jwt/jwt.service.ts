@@ -8,6 +8,7 @@ import {
 import { JWT_CONFIG_OPTIONS } from './jwt.constants';
 import { JwtModuleOptions } from './interfaces/jwt-module-options.interface';
 import * as jwt from 'jsonwebtoken';
+import { JwtPropsInterface } from './interfaces/jwt-props.interface';
 
 @Injectable()
 export class JwtService {
@@ -16,15 +17,15 @@ export class JwtService {
     private readonly jwtModuleOptions: JwtModuleOptions,
   ) {}
 
-  sign(payload: any): string {
+  sign(payload: JwtPropsInterface): string {
     return jwt.sign(payload, this.jwtModuleOptions.accessTokenPrivateKey, {
       expiresIn: '1h',
     });
   }
 
-  private static verify(token: string, secretKey: string): string {
+  private static verify(token: string, secretKey: string): JwtPropsInterface {
     try {
-      return jwt.verify(token, secretKey) as string;
+      return jwt.verify(token, secretKey) as JwtPropsInterface;
     } catch (error) {
       switch (error.message) {
         case 'jwt malformed':
@@ -38,14 +39,14 @@ export class JwtService {
     }
   }
 
-  accessTokenVerify(token: string): string {
+  accessTokenVerify(token: string): JwtPropsInterface {
     return JwtService.verify(
       token,
       this.jwtModuleOptions.accessTokenPrivateKey,
     );
   }
 
-  refreshTokenVerify(token: string): string {
+  refreshTokenVerify(token: string): JwtPropsInterface {
     return JwtService.verify(
       token,
       this.jwtModuleOptions.refreshTokenPrivateKey,
