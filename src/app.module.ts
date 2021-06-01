@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { TodoModule } from './todo/todo.module';
 import { UserModule } from './user/user.module';
+import { JwtModule } from './jwt/jwt.module';
 
 @Module({
   imports: [
@@ -16,6 +17,8 @@ import { UserModule } from './user/user.module';
         DB_USER: Joi.string().required(),
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
+        ACCESS_TOKEN_PRIVATE_KEY: Joi.string().required(),
+        REFRESH_TOKEN_PRIVATE_KEY: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -39,8 +42,13 @@ import { UserModule } from './user/user.module';
       autoSchemaFile: true,
       playground: true,
     }),
+    JwtModule.forRoot({
+      accessTokenPrivateKey: process.env.ACCESS_TOKEN_PRIVATE_KEY,
+      refreshTokenPrivateKey: process.env.REFRESH_TOKEN_PRIVATE_KEY,
+    }),
     TodoModule,
     UserModule,
+    JwtModule,
   ],
 })
 export class AppModule {}

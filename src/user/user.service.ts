@@ -1,6 +1,7 @@
 import {
   Injectable,
   InternalServerErrorException,
+  UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -8,12 +9,24 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { isExistsQuery } from '../common/utils/query';
 import { UserInput } from './dtos/user-input.dto';
+import { JwtService } from '../jwt/jwt.service';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly jwtService: JwtService,
   ) {}
+
+  async login(username: string, password: string): Promise<string> {
+    const user = await this.userRepository.findOneOrFail({ username });
+    const isValid = await argon2.verify(user.password, password);
+    if (!isValid) {
+      throw new UnauthorizedException();
+    }
+    return this.jwtService.sign({ id: user.id });
+  }
 
   async create(userInput: UserInput): Promise<User> {
     const exists = await this.isExists(userInput.username);
