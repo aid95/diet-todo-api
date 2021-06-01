@@ -1,31 +1,30 @@
 import {
   GoneException,
-  Inject,
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JWT_CONFIG_OPTIONS } from './jwt.constants';
-import { JwtModuleOptions } from './interfaces/jwt-module-options.interface';
 import * as jwt from 'jsonwebtoken';
-import { JwtPropsInterface } from './interfaces/jwt-props.interface';
+import { Token } from './interfaces/token.interface';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class JwtService {
-  constructor(
-    @Inject(JWT_CONFIG_OPTIONS)
-    private readonly jwtModuleOptions: JwtModuleOptions,
-  ) {}
+  constructor(private readonly configService: ConfigService) {}
 
-  sign(payload: JwtPropsInterface): string {
-    return jwt.sign(payload, this.jwtModuleOptions.accessTokenPrivateKey, {
-      expiresIn: '1h',
-    });
+  sign(payload: Token): string {
+    return jwt.sign(
+      payload,
+      this.configService.get<string>('ACCESS_TOKEN_PRIVATE_KEY'),
+      {
+        expiresIn: '1h',
+      },
+    );
   }
 
-  private static verify(token: string, secretKey: string): JwtPropsInterface {
+  private static verify(token: string, secretKey: string): Token {
     try {
-      return jwt.verify(token, secretKey) as JwtPropsInterface;
+      return jwt.verify(token, secretKey) as Token;
     } catch (error) {
       switch (error.message) {
         case 'jwt malformed':
@@ -39,17 +38,17 @@ export class JwtService {
     }
   }
 
-  accessTokenVerify(token: string): JwtPropsInterface {
+  accessTokenVerify(token: string): Token {
     return JwtService.verify(
       token,
-      this.jwtModuleOptions.accessTokenPrivateKey,
+      this.configService.get<string>('ACCESS_TOKEN_PRIVATE_KEY'),
     );
   }
 
-  refreshTokenVerify(token: string): JwtPropsInterface {
+  refreshTokenVerify(token: string): Token {
     return JwtService.verify(
       token,
-      this.jwtModuleOptions.refreshTokenPrivateKey,
+      this.configService.get<string>('REFRESH_TOKEN_PRIVATE_KEY'),
     );
   }
 }

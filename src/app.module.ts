@@ -49,10 +49,7 @@ import { AuthModule } from './auth/auth.module';
       autoSchemaFile: true,
       playground: true,
     }),
-    JwtModule.forRoot({
-      accessTokenPrivateKey: process.env.ACCESS_TOKEN_PRIVATE_KEY,
-      refreshTokenPrivateKey: process.env.REFRESH_TOKEN_PRIVATE_KEY,
-    }),
+    JwtModule,
     AuthModule,
     UserModule,
     TodoModule,

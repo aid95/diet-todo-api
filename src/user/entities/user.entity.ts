@@ -1,6 +1,6 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
-import { Todo } from 'src/todo/entities/todo.entity';
 import * as argon2 from 'argon2';
+import { Todo } from 'src/todo/entities/todo.entity';
 import {
   BeforeInsert,
   BeforeUpdate,
