@@ -2,25 +2,33 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isExistsQuery } from 'src/common/utils/query';
 import { Repository } from 'typeorm';
 import { TodoInput } from './dtos/todo-input.dto';
 import { Todo } from './entities/todo.entity';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class TodoService {
   constructor(
     @InjectRepository(Todo) private readonly todoRepository: Repository<Todo>,
   ) {}
-  create({ name, completed }: TodoInput): Promise<Todo> {
+
+  create(author: User, { name, completed }: TodoInput): Promise<Todo> {
+    if (!author) {
+      throw new UnauthorizedException();
+    }
+
     try {
       const completedAt = completed ? new Date() : null;
       const newTodo = this.todoRepository.create({
         name,
         completed,
         completedAt,
+        user: author,
       });
       return this.todoRepository.save(newTodo);
     } catch (error) {
@@ -51,8 +59,16 @@ export class TodoService {
     }
   }
 
-  async update(id: number, { name, completed }: TodoInput): Promise<Todo> {
-    const exists = await this.isExists(id);
+  async update(
+    author: User,
+    id: number,
+    { name, completed }: TodoInput,
+  ): Promise<Todo> {
+    if (!author) {
+      throw new UnauthorizedException();
+    }
+
+    const exists = await this.isExists(id, author.id);
     if (!exists) {
       throw new NotFoundException();
     }
@@ -65,8 +81,12 @@ export class TodoService {
     }
   }
 
-  async remove(id: number): Promise<Todo> {
-    const exists = await this.isExists(id);
+  async remove(author: User, id: number): Promise<Todo> {
+    if (!author) {
+      throw new UnauthorizedException();
+    }
+
+    const exists = await this.isExists(id, author.id);
     if (!exists) {
       throw new NotFoundException();
     }
@@ -78,20 +98,23 @@ export class TodoService {
         .createQueryBuilder()
         .delete()
         .where({ id })
+        .andWhere('user = :userId', { userId: author.id })
         .returning('*')
         .execute();
       return deletedTodo as Todo;
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException();
     }
   }
 
-  private async isExists(id: number): Promise<boolean> {
+  private async isExists(todoId: number, authorId: number): Promise<boolean> {
     try {
       const query = this.todoRepository
         .createQueryBuilder('todo')
         .select('1')
-        .where(`todo.id = ${id}`)
+        .where(`todo.id = ${todoId}`)
+        .andWhere(`todo.user = ${authorId}`)
         .getQuery();
       const [{ exists }] = await this.todoRepository.query(
         isExistsQuery(query),
